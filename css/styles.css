@@ -138,6 +138,10 @@ nav h1 a {
     text-decoration: underline;
 }
 
+.leaflet-container a {
+    color: var(--dark-gray-color);
+}
+
 #map:focus {
     box-shadow: 0 0 0 5px skyblue;
 }

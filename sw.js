@@ -13,8 +13,6 @@ for (let i = 1; i <= 10; ++i) {
 
 self.addEventListener('install', event => {
   self.skipWaiting();
-  
-  console.log('Attempting to install service worker and cache static assets');
   event.waitUntil(
     caches.open(staticCacheName)
       .then(cache => {
@@ -48,7 +46,6 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
-  console.log('Activating new service worker...');
   const cacheWhitelist = [staticCacheName];
   
   event.waitUntil(
