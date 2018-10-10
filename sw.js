@@ -4,15 +4,17 @@ let filesToCache = [
   'css/styles.css',
   'data/restaurants.json',
   'index.html',
-  'restaurant.html'
+  'restaurant.html',
+  'js/dbhelper.js',
+  'js/main.js',
+  'js/restaurant_info.js'
 ];
 
 for (let i = 1; i <= 10; ++i) {
-  filesToCache.push(`${i}.jpg`);
+  filesToCache.push(`img/${i}.jpg`);
 }
 
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(staticCacheName)
       .then(cache => {
@@ -37,9 +39,9 @@ self.addEventListener('fetch', event => {
             return response;
           });
         });
-        
+
       }).catch(error => {
-        console.error("Error fetching ", err);
+      console.error("Error fetching ", err);
       return error;
     })
   );
@@ -47,7 +49,7 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('activate', event => {
   const cacheWhitelist = [staticCacheName];
-  
+
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(

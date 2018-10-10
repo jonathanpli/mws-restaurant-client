@@ -156,7 +156,7 @@ nav, .filter-options {
     padding: 1rem;
 }
 
-.filter-options h2 {
+.filter-options h3 {
     color: white;
     font-size: 1rem;
     font-weight: normal;
@@ -207,7 +207,7 @@ nav, .filter-options {
     min-height: 248px;
 }
 
-#restaurants-list li h1 {
+#restaurants-list li h2 {
     color: var(--dark-gray-color);
     font-family: Arial, sans-serif;
     font-size: 14pt;
@@ -381,7 +381,7 @@ nav, .filter-options {
     width: 100%;
 }
 
-#reviews-container h2 {
+#reviews-container h3 {
     color: var(--dark-gray-color);
     font-size: 24pt;
     font-weight: 300;

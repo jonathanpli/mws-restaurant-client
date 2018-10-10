@@ -24,12 +24,12 @@
 
 <main id="main-content" tabindex="-1">
     <section id="map-container" aria-label="Restaurants map container">
-        <div id="map" tabindex="0" aria-label="Restaurants map"></div>
+        <div id="map" tabindex="0" aria-label="Restaurants map" role="application"></div>
     </section>
 
     <section aria-label="Filter options and restaurants list">
         <div class="filter-options">
-            <h2>Filter Results</h2>
+            <h3>Filter Results</h3>
             <select id="neighborhoods-select" title="Neighborhood Filter" aria-label="Neighborhood Filter"
                     name="neighborhoods" onchange="updateRestaurants()" accesskey="n">
                 <option value="all">All Neighborhoods</option>
