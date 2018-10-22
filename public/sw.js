@@ -2,12 +2,11 @@ const staticCacheName = 'mws-restaurant-cache-v1';
 let filesToCache = [
   '/',
   'css/styles.css',
-  'data/restaurants.json',
   'index.html',
   'restaurant.html',
   'js/dbhelper.js',
   'js/main.js',
-  'js/restaurant_info.js'
+  'js/restaurant-info.js'
 ];
 
 for (let i = 1; i <= 10; ++i) {
@@ -40,9 +39,9 @@ self.addEventListener('fetch', event => {
           });
         });
 
-      }).catch(error => {
+      }).catch(err => {
       console.error("Error fetching ", err);
-      return error;
+      return err;
     })
   );
 });
