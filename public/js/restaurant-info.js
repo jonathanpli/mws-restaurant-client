@@ -160,11 +160,9 @@
    */
   const fillBreadcrumb = async(restaurant = self.restaurant) => {
     const breadcrumb = document.getElementById('breadcrumb');
-    while (breadcrumb.children.length > 1) {
-      breadcrumb.removeChild(breadcrumb.lastChild);
-    }
     const li = document.createElement('li');
     li.innerHTML = restaurant.name;
+    li.setAttribute('aria-current', 'page');
     breadcrumb.appendChild(li);
   };
   

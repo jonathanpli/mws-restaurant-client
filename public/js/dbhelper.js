@@ -37,16 +37,12 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static async fetchRestaurants(callback) {
-    let promise = dbPromise.then(async() => {
-      let restaurants = await IDBWrapper.getRestaurants();
-      await callback(null, restaurants);
-    });
-    
+
     fetch(DBHelper.DATABASE_URL).then(async(response) => {
       if (response.status !== 200) {
         const error = (`Request failed. Returned status of ${response.status}`);
         await callback(error, null);
-        throw new Error('Done');
+        throw new Error('Failed to get restaurants from server');
       } else {
         return response.json();
       }
@@ -62,13 +58,13 @@ class DBHelper {
         await callback(null, restaurants);
         return completed;
       });
-    }).catch(err => {
-      if (err.message !== 'Done') {
-        console.error('Error fetching restaurants from server', err);
-      }
+    }).catch(async (err) => {
+      console.error('Error:', err);
+      await dbPromise.then(async() => {
+        let restaurants = await IDBWrapper.getRestaurants();
+        await callback(null, restaurants);
+      });
     });
-    
-    await promise;
   }
   
   /**
