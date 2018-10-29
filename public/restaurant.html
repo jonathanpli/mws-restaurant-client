@@ -45,6 +45,7 @@
     <!-- Beginning restaurant -->
     <section id="restaurant-container" aria-label="Restaurants map container">
         <h2 id="restaurant-name"></h2>
+        <button id="is-favorite" onclick="toggleFavorite(this)"></button>
         <img id="restaurant-img">
         <p id="restaurant-cuisine"></p>
         <p id="restaurant-address"></p>
@@ -60,6 +61,23 @@
     <!-- Beginning reviews -->
     <section id="reviews-container" aria-label="Reviews container">
         <ul id="reviews-list"></ul>
+
+        <form>
+            <label for="form-name">Name:</label>
+            <input id="form-name" type="text" name="name" />
+
+            <br/>
+
+            <label for="form-rating">Rating:</label>
+            <input id="form-rating" type="number" name="rating" />
+
+            <br/>
+
+            <label for="form-review">Review:</label>
+            <textarea id="form-review" name="review" aria-label="New Review Content"></textarea>
+
+            <button type="button">Add Review</button>
+        </form>
     </section>
     <!-- End reviews -->
 </main>
