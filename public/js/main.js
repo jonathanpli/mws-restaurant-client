@@ -1,20 +1,20 @@
 'use strict';
 
-document.addEventListener('DOMContentLoaded', async() => {
+const start = async() => {
+  await DBHelper.init();
   await initMap();
-  await dbHelper.init();
   await updateRestaurants();
   await fetchNeighborhoods();
   await fetchCuisines();
-});
+};
 
-let dbHelper = new DBHelper();
+document.addEventListener('DOMContentLoaded', start);
 
 /**
  * Fetch all neighborhoods and set their HTML.
  */
 const fetchNeighborhoods = async() => {
-  let neighborhoods = await dbHelper.fetchNeighborhoods();
+  let neighborhoods = await DBHelper.fetchNeighborhoods();
   fillNeighborhoodsHTML(neighborhoods);
 };
 
@@ -35,7 +35,7 @@ const fillNeighborhoodsHTML = (neighborhoods) => {
  * Fetch all cuisines and set their HTML.
  */
 const fetchCuisines = async() => {
-  let cuisines = await dbHelper.fetchCuisines();
+  let cuisines = await DBHelper.fetchCuisines();
   fillCuisinesHTML(cuisines);
 };
 
@@ -85,7 +85,7 @@ const updateRestaurants = async() => {
   const cuisine = cSelect[cIndex].value;
   const neighborhood = nSelect[nIndex].value;
   
-  let restaurants = await dbHelper.fetchRestaurantsByCuisineAndNeighborhood(cuisine, neighborhood);
+  let restaurants = await DBHelper.fetchRestaurantsByCuisineAndNeighborhood(cuisine, neighborhood);
   resetRestaurants(restaurants);
   fillRestaurantsHTML(restaurants);
 };
@@ -169,7 +169,7 @@ const createRestaurantHTML = (restaurant) => {
  * Add markers for current restaurants to the map.
  */
 const addMarkersToMap = () => {
-  dbHelper.restaurants.forEach(restaurant => {
+  DBHelper.restaurants.forEach(restaurant => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.newMap);
     marker.on("click", onClick);
@@ -181,10 +181,10 @@ const addMarkersToMap = () => {
   });
 };
 
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('../sw.js', {scope: '/'}).then(registration => {
-      // registration success!
+      return registration.sync.register('initialSync');
     }, err => {
       // registration failed!
       console.log('ServiceWorker registration failed: ', err);

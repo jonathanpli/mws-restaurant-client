@@ -4,11 +4,9 @@
  * Initialize map as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', async(event) => {
+  await DBHelper.init();
   await initMap();
-  await dbHelper.init();
 });
-
-let dbHelper = new DBHelper();
 
 /**
  * Initialize leaflet map
@@ -47,11 +45,11 @@ const fetchRestaurantFromURL = async() => {
     return self.restaurant;
   }
   
-  const id = await getParameterByName('id');
+  const id = getParameterByName('id');
   if (!id) {
     return null;
   } else {
-    let restaurant = await dbHelper.fetchRestaurantById(id);
+    let restaurant = await DBHelper.fetchRestaurantById(id);
     self.restaurant = restaurant;
     await fillRestaurantHTML(restaurant);
     return restaurant;
@@ -66,7 +64,8 @@ const fillRestaurantHTML = async(restaurant = self.restaurant) => {
   name.innerHTML = restaurant.name;
   
   const isFavorite = document.getElementById('is-favorite');
-  isFavorite.innerHTML = restaurant.is_favorite ? 'Remove as Favorite' : 'Add as Favorite';
+  isFavorite.innerHTML = restaurant.is_favorite ? '&#x2665;' : '&#x2661;';
+  isFavorite.setAttribute('aria-label', restaurant.is_favorite ? 'Remove as Favorite' : 'Add as Favorite');
   
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
@@ -170,21 +169,39 @@ const fillBreadcrumb = async(restaurant = self.restaurant) => {
 /**
  * Get a parameter by name from page URL.
  */
-const getParameterByName = async(name, url = window.location.search) => {
+const getParameterByName = (name, url = window.location.search) => {
   let urlParams = new URLSearchParams(url);
   return urlParams.get(name);
 };
 
 const toggleFavorite = async() => {
-  let id = await getParameterByName('id');
-  let restaurant = await dbHelper.toggleRestaurantFavorite(id);
+  const storeKey = 'restaurants';
+  let id = getParameterByName('id');
+  let restaurant = await DBHelper.fetchRestaurantById(id);
+  await DBHelper.toggleRestaurantFavorite(restaurant);
   
   const isFavorite = document.getElementById('is-favorite');
-  isFavorite.innerHTML = restaurant.is_favorite ? 'Remove as Favorite' : 'Add as Favorite';
+  isFavorite.innerHTML = restaurant.is_favorite ? '&#x2665;' : '&#x2661;';
+  isFavorite.setAttribute('aria-label', restaurant.is_favorite ? 'Remove as Favorite' : 'Add as Favorite');
   
   await dbPromise.then(async(db) => {
     const tx = db.transaction(storeKey, 'readwrite');
     tx.objectStore(storeKey).put(restaurant);
+  });
+};
+
+const addReview = () => {
+  const form = document.getElementById("review-form");
+  const review = {
+    restaurant_id: getParameterByName('id'),
+    name: form.elements.namedItem('review-name').value,
+    rating: form.elements.namedItem('review-rating').value,
+    comments: form.elements.namedItem('review-content').value
+  };
+  
+  DBHelper.saveReview(review).then((res) => {
+    console.log("Done!", res);
+    form.reset();
   });
 };
 

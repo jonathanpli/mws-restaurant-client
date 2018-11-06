@@ -61,3 +61,10 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
+self.addEventListener('sync', event => {
+  console.log("Event is ", event);
+  if (event.tag === 'initialSync') {
+    event.waitUntil(IDBHelper.sync());
+  }
+});

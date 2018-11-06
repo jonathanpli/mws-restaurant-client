@@ -3,12 +3,16 @@
  */
 class DBHelper {
   
-  constructor() {
-    this.databaseUrl = 'http://localhost:1337';
-  }
-  
-  async init() {
-    this.restaurants = await this.fetchRestaurants();
+  static async init() {
+    DBHelper.databaseUrl = 'http://localhost:1337';
+    DBHelper.restaurants = await DBHelper.fetchRestaurants();
+    
+    let reviews = await DBHelper.fetchReviews();
+    if (reviews) {
+      for (let restaurant of DBHelper.restaurants) {
+        restaurant.reviews = reviews.filter(review => review.restaurant_id === restaurant.id);
+      }
+    }
   }
   
   static _isEqual(obj1, obj2) {
@@ -30,18 +34,42 @@ class DBHelper {
     return true;
   }
   
+  static async fetchReviews() {
+    const storeKey = 'reviews';
+    return await fetch(`${DBHelper.databaseUrl}/reviews`).then(response => {
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch reviews from server');
+      }
+      return response.json();
+    }).then(reviews => {
+      return dbPromise.then(async(db) => {
+        const tx = db.transaction(storeKey, 'readwrite');
+        for (let review of reviews) {
+          if (!DBHelper._isEqual(await IDBWrapper.getReviews(review.id, tx), review)) {
+            tx.objectStore(storeKey).put(review);
+          }
+        }
+        return reviews;
+      });
+    }).catch(async(err) => {
+      console.error('Loading from IndexedDB since there was an error:', err);
+      await dbPromise.then(async() => {
+        return await IDBWrapper.getReviews();
+      });
+    });
+  }
+  
   /**
    * Fetch all restaurants.
    */
-  async fetchRestaurants() {
-    return await fetch(`${this.databaseUrl}/restaurants`).then(response => {
+  static async fetchRestaurants() {
+    const storeKey = 'restaurants';
+    return await fetch(`${DBHelper.databaseUrl}/restaurants`).then(response => {
       if (response.status !== 200) {
         throw new Error('Failed to fetch restaurants from server');
       }
       return response.json();
     }).then(restaurants => {
-      this.restaurants = restaurants;
-      
       return dbPromise.then(async(db) => {
         const tx = db.transaction(storeKey, 'readwrite');
         for (let restaurant of restaurants) {
@@ -62,18 +90,18 @@ class DBHelper {
   /**
    * Fetch a restaurant by its ID.
    */
-  async fetchRestaurantById(id) {
-    if (!this.restaurants) {
-      this.restaurants = await this.fetchRestaurants();
+  static async fetchRestaurantById(id) {
+    if (!DBHelper.restaurants) {
+      DBHelper.restaurants = await DBHelper.fetchRestaurants();
     }
-    return this.restaurants.find(restaurant => restaurant.id === Number.parseInt(id));
+    return DBHelper.restaurants.find(restaurant => restaurant.id === Number.parseInt(id));
   }
   
   /**
    * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
    */
-  async fetchRestaurantsByCuisineAndNeighborhood(cuisine, neighborhood) {
-    return this.restaurants.filter(restaurant => {
+  static async fetchRestaurantsByCuisineAndNeighborhood(cuisine, neighborhood) {
+    return DBHelper.restaurants.filter(restaurant => {
       return (cuisine === 'all' || restaurant.cuisine_type === cuisine) && (neighborhood === 'all' || restaurant.neighborhood === neighborhood);
     });
   }
@@ -81,24 +109,34 @@ class DBHelper {
   /**
    * Fetch all neighborhoods with proper error handling.
    */
-  async fetchNeighborhoods() {
-    return this.restaurants.map(restaurant => restaurant.neighborhood);
+  static async fetchNeighborhoods() {
+    return DBHelper.restaurants.map(restaurant => restaurant.neighborhood);
   }
   
   /**
    * Fetch all cuisines with proper error handling.
    */
-  async fetchCuisines() {
-    return this.restaurants.map(restaurant => restaurant.cuisine_type);
+  static async fetchCuisines() {
+    return DBHelper.restaurants.map(restaurant => restaurant.cuisine_type);
   }
   
-  async toggleRestaurantFavorite(id) {
-    let restaurant = await this.fetchRestaurantById(id);
+  static async toggleRestaurantFavorite(restaurant) {
     restaurant.is_favorite = !restaurant.is_favorite;
-    await fetch(`${this.databaseUrl}/restaurants/${id}?is_favorite=${restaurant.is_favorite}`, {
+    restaurant.updatedAt = new Date().toISOString();
+    await fetch(`${DBHelper.databaseUrl}/restaurants/${restaurant.id}?is_favorite=${restaurant.is_favorite}`, {
       method: 'PUT'
     });
     return restaurant;
+  }
+  
+  static async saveReview(review) {
+    return fetch(`${DBHelper.databaseUrl}/reviews`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify(review)
+    });
   }
   
   /**
