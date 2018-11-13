@@ -64,15 +64,14 @@
     <section id="reviews-container" aria-label="Reviews container">
         <ul id="reviews-list"></ul>
 
-        <p id="form-status"></p>
-
+        <h4>Add a Review</h4>
         <form id="review-form">
-            <div>
+            <div class="form-group">
                 <label for="review-name">Name:</label>
                 <input id="review-name" type="text" name="name"/>
             </div>
 
-            <div>
+            <div class="form-group">
                 <label for="review-rating">Rating:</label>
                 <input id="review-rating" list="review-ratings" type="number" name="rating"/>
                 <datalist id="review-ratings">
@@ -85,12 +84,14 @@
                 </datalist>
             </div>
 
-            <div>
+            <div class="form-group">
                 <label for="review-content">Review:</label>
                 <textarea id="review-content" name="review" aria-label="New Review Content"></textarea>
             </div>
 
-            <button type="button" onclick="addReview(this)">Add Review</button>
+            <div class="form-group">
+                <button type="button" onclick="addReview(this)" aria-label="Add Review">Add Review</button>
+            </div>
         </form>
     </section>
     <!-- End reviews -->

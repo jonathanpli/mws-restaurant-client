@@ -1,6 +1,7 @@
 /**
  * Common database helper functions.
  */
+
 class DBHelper {
   
   static async init() {
@@ -36,25 +37,27 @@ class DBHelper {
   
   static async fetchReviews() {
     const storeKey = 'reviews';
-    return await fetch(`${DBHelper.databaseUrl}/reviews`).then(response => {
-      if (response.status !== 200) {
+    return fetch(`${DBHelper.databaseUrl}/reviews`, {method: 'GET'}).then(async response => {
+      let reviews = await response.json();
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error('Failed to fetch reviews from server');
       }
-      return response.json();
+      return reviews;
     }).then(reviews => {
       return dbPromise.then(async(db) => {
         const tx = db.transaction(storeKey, 'readwrite');
         for (let review of reviews) {
+          delete review.outOfSync;
           if (!DBHelper._isEqual(await IDBWrapper.getReviews(review.id, tx), review)) {
             tx.objectStore(storeKey).put(review);
           }
         }
-        return reviews;
+        return IDBWrapper.getReviews();
       });
     }).catch(async(err) => {
       console.error('Loading from IndexedDB since there was an error:', err);
-      await dbPromise.then(async() => {
-        return await IDBWrapper.getReviews();
+      return dbPromise.then(() => {
+        return IDBWrapper.getReviews();
       });
     });
   }
@@ -130,12 +133,22 @@ class DBHelper {
   }
   
   static async saveReview(review) {
+    const key = 'reviews';
+    review.restaurant_id = Number.parseInt(review.restaurant_id);
+    review.rating = Number.parseInt(review.rating);
+    // Add to IDB
+    const reviewId = await IDBWrapper.saveElement(key, review, true);
     return fetch(`${DBHelper.databaseUrl}/reviews`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json; charset=utf-8"
       },
       body: JSON.stringify(review)
+    }).then(res => {
+      if (res.status === 201) {
+        review.id = reviewId;
+        return IDBWrapper.saveElement(key, review, false);
+      }
     });
   }
   

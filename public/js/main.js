@@ -183,8 +183,9 @@ const addMarkersToMap = () => {
 
 if ('serviceWorker' in navigator && 'SyncManager' in window) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../sw.js', {scope: '/'}).then(registration => {
-      return registration.sync.register('initialSync');
+    navigator.serviceWorker.register('../sw.js', {scope: '/'}).then(async reg => {
+      await navigator.serviceWorker.ready;
+      return reg.sync.register('initialSync');
     }, err => {
       // registration failed!
       console.log('ServiceWorker registration failed: ', err);

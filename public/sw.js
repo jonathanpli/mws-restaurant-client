@@ -1,9 +1,18 @@
+importScripts(
+  'js/idb.min.js',
+  'js/idb-helper.js',
+  'js/dbhelper.js'
+);
+
 const staticCacheName = 'mws-restaurant-cache-v1';
 let filesToCache = [
   '/',
   'css/styles.css',
+  'css/styles.min.css',
   'index.html',
   'restaurant.html',
+  'js/dbhelper.js',
+  'js/idb-helper.js',
   'js/dbhelper.js',
   'js/main.js',
   'js/restaurant-info.js'
@@ -63,8 +72,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('sync', event => {
-  console.log("Event is ", event);
   if (event.tag === 'initialSync') {
-    event.waitUntil(IDBHelper.sync());
+    event.waitUntil(DBHelper.init().then(IDBWrapper.sync()));
   }
 });

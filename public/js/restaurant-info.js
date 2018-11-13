@@ -199,16 +199,20 @@ const addReview = () => {
     comments: form.elements.namedItem('review-content').value
   };
   
-  DBHelper.saveReview(review).then((res) => {
-    console.log("Done!", res);
+  DBHelper.saveReview(review).then(() => {
     form.reset();
+    window.location.reload();
+  }).catch(err => {
+    console.error("Error saving review", err);
+    
   });
 };
 
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../sw.js', {scope: '/'}).then(registration => {
-      // registration success!
+    navigator.serviceWorker.register('../sw.js', {scope: '/'}).then(async reg => {
+      await navigator.serviceWorker.ready;
+      return reg.sync.register('initialSync');
     }, err => {
       // registration failed!
       console.log('ServiceWorker registration failed: ', err);

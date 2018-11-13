@@ -420,7 +420,7 @@ nav, .filter-options {
 #is-favorite {
     border: none;
     background: none;
-    color: red;
+    color: #A50000;
     font-size: 16px;
 }
 
@@ -430,12 +430,37 @@ nav, .filter-options {
     vertical-align: middle;
 }
 
-.success {
-    background-color: lime;
+#review-form {
+    width: 100%;
+    text-align: center;
 }
 
-.error {
-    background-color: red;
+.form-group {
+    margin: 10px;
+}
+
+.form-group label {
+    width: 100px;
+    display: inline-block;
+    vertical-align: top;
+    padding: 10px;
+    text-align: left;
+}
+
+.form-group input, .form-group textarea {
+    width: 150px;
+    padding: 10px;
+}
+
+.form-group button {
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: var(--dark-gray-color);
+    color: var(--light-color);
+}
+
+h4 {
+    text-align: center;
 }
 
 @media only screen and (max-width: 700px) {
